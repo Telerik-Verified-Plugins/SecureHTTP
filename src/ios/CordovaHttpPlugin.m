@@ -19,7 +19,13 @@
 }
 
 - (void)setRequestHeaders:(NSDictionary*)headers {
-    [HttpManager sharedClient].requestSerializer = [AFHTTPRequestSerializer serializer];
+    NSString *contentType = [headers objectForKey:@"Content-Type"];
+    if([contentType isEqualToString:@"application/json"]){
+        [HttpManager sharedClient].requestSerializer = [AFJSONRequestSerializer serializer];
+    } else {
+        [HttpManager sharedClient].requestSerializer = [AFHTTPRequestSerializer serializer];
+    }
+
     [requestSerializer.HTTPRequestHeaders enumerateKeysAndObjectsUsingBlock:^(id key, id obj, BOOL *stop) {
         [[HttpManager sharedClient].requestSerializer setValue:obj forHTTPHeaderField:key];
     }];
@@ -76,6 +82,33 @@
    NSString *url = [command.arguments objectAtIndex:0];
    NSDictionary *parameters = [command.arguments objectAtIndex:1];
    NSDictionary *headers = [command.arguments objectAtIndex:2];
+   [self setRequestHeaders: headers];
+    
+   
+   CordovaHttpPlugin* __weak weakSelf = self;
+   manager.responseSerializer = [TextResponseSerializer serializer];
+   [manager POST:url parameters:parameters success:^(AFHTTPRequestOperation *operation, id responseObject) {
+      NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
+      [dictionary setObject:[NSNumber numberWithInt:operation.response.statusCode] forKey:@"status"];
+      [dictionary setObject:responseObject forKey:@"data"];
+      CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:dictionary];
+      [weakSelf.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+   } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
+      NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
+      [dictionary setObject:[NSNumber numberWithInt:operation.response.statusCode] forKey:@"status"];
+      [dictionary setObject:[error localizedDescription] forKey:@"error"];
+      CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsDictionary:dictionary];
+      [weakSelf.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+   }];
+}
+
+- (void)postJson:(CDVInvokedUrlCommand*)command {
+   HttpManager *manager = [HttpManager sharedClient];
+   NSString *url = [command.arguments objectAtIndex:0];
+   NSData *parameters = [command.arguments objectAtIndex:1];
+   NSDictionary *headers = [command.arguments objectAtIndex:2];
+    
+   [headers setValue:@"application/json" forKey:@"Content-Type"];
    [self setRequestHeaders: headers];
    
    CordovaHttpPlugin* __weak weakSelf = self;
