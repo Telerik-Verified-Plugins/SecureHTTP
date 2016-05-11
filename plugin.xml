@@ -2,10 +2,10 @@
 <plugin xmlns="http://www.phonegap.com/ns/plugins/1.0"
   xmlns:android="http://schemas.android.com/apk/res/android"
   id="com.synconset.cordovaHTTP"
-  version="0.1.7">
+  version="0.1.8">
 
     <name>SSL Pinning</name>
- 
+
     <description>
         Cordova / Phonegap plugin for communicating with HTTP servers using SSL pinning
 	</description>
@@ -30,14 +30,14 @@
 
         <header-file src="src/ios/CordovaHttpPlugin.h" />
         <source-file src="src/ios/CordovaHttpPlugin.m" />
-        
+
         <header-file src="src/ios/HTTPManager.h" />
         <source-file src="src/ios/HTTPManager.m" />
-        
+
         <header-file src="src/ios/TextResponseSerializer.h" />
         <source-file src="src/ios/TextResponseSerializer.m" />
 
-        <dependency id="com.telerik.afnetworking" />
+        <dependency id="cordova-plugin-afnetworking" />
 
         <framework src="SystemConfiguration.framework" />
         <framework src="Security.framework" />
