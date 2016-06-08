@@ -13,9 +13,9 @@ Cordova / Phonegap plugin for communicating with HTTP servers.  Supports iOS and
 The plugin conforms to the Cordova plugin specification, it can be installed
 using the Cordova / Phonegap command line interface.
 
-    phonegap plugin add https://github.com/wymsee/cordova-HTTP.git
+    phonegap plugin add https://github.com/spacegraym3/cordova-HTTP.git
 
-    cordova plugin add https://github.com/wymsee/cordova-HTTP.git
+    cordova plugin add https://github.com/spacegraym3/cordova-HTTP.git
 
 ## Usage
 
