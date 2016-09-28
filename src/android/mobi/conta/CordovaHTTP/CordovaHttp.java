@@ -1,7 +1,7 @@
 /**
  * A HTTP plugin for Cordova / Phonegap
  */
-package com.synconset;
+package mobi.conta;
 
 import org.apache.cordova.CallbackContext;
 
@@ -12,6 +12,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.BufferedReader;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -35,11 +37,20 @@ public abstract class CordovaHttp {
     
     private static AtomicBoolean sslPinning = new AtomicBoolean(false);
     private static AtomicBoolean acceptAllCerts = new AtomicBoolean(false);
-    
+    private static AtomicBoolean validateDomainName = new AtomicBoolean(true);
+
     private String urlString;
     private Map<?, ?> params;
+    private JSONObject jsonObject;
     private Map<String, String> headers;
     private CallbackContext callbackContext;
+
+    public CordovaHttp(String urlString, JSONObject jsonObj, Map<String, String> headers, CallbackContext callbackContext) {
+        this.urlString = urlString;
+        this.jsonObject = jsonObj;
+        this.headers = headers;
+        this.callbackContext = callbackContext;
+    }
     
     public CordovaHttp(String urlString, Map<?, ?> params, Map<String, String> headers, CallbackContext callbackContext) {
         this.urlString = urlString;
@@ -61,7 +72,11 @@ public abstract class CordovaHttp {
             sslPinning.set(false);
         }
     }
-    
+
+    public static void validateDomainName(boolean accept) {
+        validateDomainName.set(accept);
+    }
+
     protected String getUrlString() {
         return this.urlString;
     }
@@ -69,11 +84,15 @@ public abstract class CordovaHttp {
     protected Map<?, ?> getParams() {
         return this.params;
     }
+
+    protected JSONObject getJsonObject() {
+        return this.jsonObject;
+    }
     
     protected Map<String, String> getHeaders() {
         return this.headers;
     }
-    
+   
     protected CallbackContext getCallbackContext() {
         return this.callbackContext;
     }
@@ -81,6 +100,8 @@ public abstract class CordovaHttp {
     protected HttpRequest setupSecurity(HttpRequest request) {
         if (acceptAllCerts.get()) {
             request.trustAllCerts();
+        }
+        if (!validateDomainName.get()) {
             request.trustAllHosts();
         }
         if (sslPinning.get()) {
@@ -102,5 +123,18 @@ public abstract class CordovaHttp {
     
     protected void respondWithError(String msg) {
         this.respondWithError(500, msg);
+    }
+
+    protected void addResponseHeaders(HttpRequest request, JSONObject response) throws JSONException {
+        Map<String, List<String>> headers = request.headers();
+        Map<String, String> parsed_headers = new HashMap<String, String>();
+        for (Map.Entry<String, List<String>> entry : headers.entrySet()) {
+            String key = entry.getKey();
+            List<String> value = entry.getValue();
+            if ((key != null) && (!value.isEmpty())) {
+                parsed_headers.put(key, value.get(0));
+            }
+        }
+        response.put("headers", new JSONObject(parsed_headers));
     }
 }

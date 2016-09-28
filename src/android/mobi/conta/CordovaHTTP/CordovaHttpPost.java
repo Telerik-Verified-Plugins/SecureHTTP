@@ -1,7 +1,7 @@
 /**
  * A HTTP plugin for Cordova / Phonegap
  */
-package com.synconset;
+package mobi.conta;
 
 import java.net.UnknownHostException;
 import java.util.Map;
@@ -49,7 +49,7 @@ public class CordovaHttpPost extends CordovaHttp implements Runnable {
             } else if (e.getCause() instanceof SSLHandshakeException) {
                 this.respondWithError("SSL handshake failed");
             } else {
-                this.respondWithError("There was an error with the request");
+                this.respondWithError("There was an error with the request" + e.getMessage());
             }
         }
     }

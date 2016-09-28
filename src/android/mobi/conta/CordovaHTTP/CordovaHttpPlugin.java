@@ -1,7 +1,7 @@
 /**
  * A HTTP plugin for Cordova / Phonegap
  */
-package com.synconset;
+package mobi.conta;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
@@ -66,6 +66,13 @@ public class CordovaHttpPlugin extends CordovaPlugin {
             HashMap<String, String> headersMap = this.addToMap(this.globalHeaders, headers);
             CordovaHttpPost post = new CordovaHttpPost(urlString, paramsMap, headersMap, callbackContext);
             cordova.getThreadPool().execute(post);
+        } else if (action.equals("postJson")) {
+            String urlString = args.getString(0);
+            JSONObject jsonObj = args.getJSONObject(1);
+            JSONObject headers = args.getJSONObject(2);
+            HashMap<String, String> headersMap = this.getStringMapFromJSONObject(headers);
+            CordovaHttpPostJson postJson = new CordovaHttpPostJson(urlString, jsonObj, headersMap, callbackContext);
+            cordova.getThreadPool().execute(postJson);
         } else if (action.equals("put")) {
             String urlString = args.getString(0);
             JSONObject params = args.getJSONObject(1);
@@ -74,6 +81,13 @@ public class CordovaHttpPlugin extends CordovaPlugin {
             HashMap<String, String> headersMap = this.addToMap(this.globalHeaders, headers);
             CordovaHttpPut put = new CordovaHttpPut(urlString, paramsMap, headersMap, callbackContext);
             cordova.getThreadPool().execute(put);
+        } else if (action.equals("putJson")) {
+            String urlString = args.getString(0);
+            JSONObject jsonObj = args.getJSONObject(1);
+            JSONObject headers = args.getJSONObject(2);
+            HashMap<String, String> headersMap = this.getStringMapFromJSONObject(headers);
+            CordovaHttpPutJson putJson = new CordovaHttpPutJson(urlString, jsonObj, headersMap, callbackContext);
+            cordova.getThreadPool().execute(putJson);
         } else if (action.equals("delete")) {
             String urlString = args.getString(0);
             JSONObject params = args.getJSONObject(1);
@@ -82,6 +96,13 @@ public class CordovaHttpPlugin extends CordovaPlugin {
             HashMap<String, String> headersMap = this.addToMap(this.globalHeaders, headers);
             CordovaHttpDelete delete = new CordovaHttpDelete(urlString, paramsMap, headersMap, callbackContext);
             cordova.getThreadPool().execute(delete);
+        } else if (action.equals("deleteJson")) {
+            String urlString = args.getString(0);
+            JSONObject jsonObj = args.getJSONObject(1);
+            JSONObject headers = args.getJSONObject(2);
+            HashMap<String, String> headersMap = this.getStringMapFromJSONObject(headers);
+            CordovaHttpDeleteJson deleteJson = new CordovaHttpDeleteJson(urlString, jsonObj, headersMap, callbackContext);
+            cordova.getThreadPool().execute(deleteJson);
         } else if (action.equals("useBasicAuth")) {
             String username = args.getString(0);
             String password = args.getString(1);
@@ -186,6 +207,17 @@ public class CordovaHttpPlugin extends CordovaPlugin {
             newMap.put(key, object.getString(key));
         }
         return newMap;
+    }
+
+    private HashMap<String, String> getStringMapFromJSONObject(JSONObject object) throws JSONException {
+        HashMap<String, String> map = new HashMap<String, String>();
+        Iterator<?> i = object.keys();
+
+        while (i.hasNext()) {
+            String key = (String)i.next();
+            map.put(key, object.getString(key));
+        }
+        return map;
     }
 
     private HashMap<String, Object> getMapFromJSONObject(JSONObject object) throws JSONException {

@@ -212,72 +212,16 @@
 }
 
 - (NSURLSessionDataTask *)PUT:(NSString *)URLString
-                    parameters:(id)parameters
-                       success:(void (^)(NSURLSessionDataTask *task, id responseObject))success
-                       failure:(void (^)(NSURLSessionDataTask *task, NSError *error))failure
+                   parameters:(id)parameters
+                      success:(void (^)(NSURLSessionDataTask *task, id responseObject))success
+                      failure:(void (^)(NSURLSessionDataTask *task, NSError *error))failure
 {
-    return [self PUT:URLString parameters:parameters progress:nil success:success failure:failure];
-}
-
-- (NSURLSessionDataTask *)PUT:(NSString *)URLString
-                    parameters:(id)parameters
-                      progress:(void (^)(NSProgress * _Nonnull))uploadProgress
-                       success:(void (^)(NSURLSessionDataTask * _Nonnull, id _Nullable))success
-                       failure:(void (^)(NSURLSessionDataTask * _Nullable, NSError * _Nonnull))failure
-{
-    NSURLSessionDataTask *dataTask = [self dataTaskWithHTTPMethod:@"PUT" URLString:URLString parameters:parameters uploadProgress:uploadProgress downloadProgress:nil success:success failure:failure];
+    NSURLSessionDataTask *dataTask = [self dataTaskWithHTTPMethod:@"PUT" URLString:URLString parameters:parameters uploadProgress:nil downloadProgress:nil success:success failure:failure];
 
     [dataTask resume];
 
     return dataTask;
 }
-
-
-- (NSURLSessionDataTask *)PUT:(NSString *)URLString
-                    parameters:(nullable id)parameters
-     constructingBodyWithBlock:(nullable void (^)(id<AFMultipartFormData> _Nonnull))block
-                       success:(nullable void (^)(NSURLSessionDataTask * _Nonnull, id _Nullable))success
-                       failure:(nullable void (^)(NSURLSessionDataTask * _Nullable, NSError * _Nonnull))failure
-{
-    return [self PUT:URLString parameters:parameters constructingBodyWithBlock:block progress:nil success:success failure:failure];
-}
-
-- (NSURLSessionDataTask *)PUT:(NSString *)URLString
-                    parameters:(id)parameters
-     constructingBodyWithBlock:(void (^)(id <AFMultipartFormData> formData))block
-                      progress:(nullable void (^)(NSProgress * _Nonnull))uploadProgress
-                       success:(void (^)(NSURLSessionDataTask *task, id responseObject))success
-                       failure:(void (^)(NSURLSessionDataTask *task, NSError *error))failure
-{
-    NSError *serializationError = nil;
-    NSMutableURLRequest *request = [self.requestSerializer multipartFormRequestWithMethod:@"PUT" URLString:[[NSURL URLWithString:URLString relativeToURL:self.baseURL] absoluteString] parameters:parameters constructingBodyWithBlock:block error:&serializationError];
-    if (serializationError) {
-        if (failure) {
-            dispatch_async(self.completionQueue ?: dispatch_get_main_queue(), ^{
-                failure(nil, serializationError);
-            });
-        }
-
-        return nil;
-    }
-
-    __block NSURLSessionDataTask *task = [self uploadTaskWithStreamedRequest:request progress:uploadProgress completionHandler:^(NSURLResponse * __unused response, id responseObject, NSError *error) {
-        if (error) {
-            if (failure) {
-                failure(task, error);
-            }
-        } else {
-            if (success) {
-                success(task, responseObject);
-            }
-        }
-    }];
-
-    [task resume];
-
-    return task;
-}
-
 
 - (NSURLSessionDataTask *)PATCH:(NSString *)URLString
                      parameters:(id)parameters
@@ -291,72 +235,16 @@
     return dataTask;
 }
 
-
 - (NSURLSessionDataTask *)DELETE:(NSString *)URLString
-                   parameters:(id)parameters
-                      success:(void (^)(NSURLSessionDataTask *task, id responseObject))success
-                      failure:(void (^)(NSURLSessionDataTask *task, NSError *error))failure
+                      parameters:(id)parameters
+                         success:(void (^)(NSURLSessionDataTask *task, id responseObject))success
+                         failure:(void (^)(NSURLSessionDataTask *task, NSError *error))failure
 {
-    return [self DELETE:URLString parameters:parameters progress:nil success:success failure:failure];
-}
-
-- (NSURLSessionDataTask *)DELETE:(NSString *)URLString
-                   parameters:(id)parameters
-                     progress:(void (^)(NSProgress * _Nonnull))uploadProgress
-                      success:(void (^)(NSURLSessionDataTask * _Nonnull, id _Nullable))success
-                      failure:(void (^)(NSURLSessionDataTask * _Nullable, NSError * _Nonnull))failure
-{
-    NSURLSessionDataTask *dataTask = [self dataTaskWithHTTPMethod:@"DELETE" URLString:URLString parameters:parameters uploadProgress:uploadProgress downloadProgress:nil success:success failure:failure];
+    NSURLSessionDataTask *dataTask = [self dataTaskWithHTTPMethod:@"DELETE" URLString:URLString parameters:parameters uploadProgress:nil downloadProgress:nil success:success failure:failure];
 
     [dataTask resume];
 
     return dataTask;
-}
-
-
-- (NSURLSessionDataTask *)DELETE:(NSString *)URLString
-                   parameters:(nullable id)parameters
-    constructingBodyWithBlock:(nullable void (^)(id<AFMultipartFormData> _Nonnull))block
-                      success:(nullable void (^)(NSURLSessionDataTask * _Nonnull, id _Nullable))success
-                      failure:(nullable void (^)(NSURLSessionDataTask * _Nullable, NSError * _Nonnull))failure
-{
-    return [self DELETE:URLString parameters:parameters constructingBodyWithBlock:block progress:nil success:success failure:failure];
-}
-
-- (NSURLSessionDataTask *)DELETE:(NSString *)URLString
-                   parameters:(id)parameters
-    constructingBodyWithBlock:(void (^)(id <AFMultipartFormData> formData))block
-                     progress:(nullable void (^)(NSProgress * _Nonnull))uploadProgress
-                      success:(void (^)(NSURLSessionDataTask *task, id responseObject))success
-                      failure:(void (^)(NSURLSessionDataTask *task, NSError *error))failure
-{
-    NSError *serializationError = nil;
-    NSMutableURLRequest *request = [self.requestSerializer multipartFormRequestWithMethod:@"DELETE" URLString:[[NSURL URLWithString:URLString relativeToURL:self.baseURL] absoluteString] parameters:parameters constructingBodyWithBlock:block error:&serializationError];
-    if (serializationError) {
-        if (failure) {
-            dispatch_async(self.completionQueue ?: dispatch_get_main_queue(), ^{
-                failure(nil, serializationError);
-            });
-        }
-
-        return nil;
-    }
-
-    __block NSURLSessionDataTask *task = [self uploadTaskWithStreamedRequest:request progress:uploadProgress completionHandler:^(NSURLResponse * __unused response, id responseObject, NSError *error) {
-        if (error) {
-            if (failure) {
-                failure(task, error);
-            }
-        } else {
-            if (success) {
-                success(task, responseObject);
-            }
-        }
-    }];
-
-    [task resume];
-
-    return task;
 }
 
 - (NSURLSessionDataTask *)dataTaskWithHTTPMethod:(NSString *)method

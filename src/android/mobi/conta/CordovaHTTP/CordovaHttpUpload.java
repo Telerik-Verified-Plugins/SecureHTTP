@@ -1,7 +1,7 @@
 /**
  * A HTTP plugin for Cordova / Phonegap
  */
-package com.synconset;
+package mobi.conta;
 
 import java.io.File;
 import java.net.UnknownHostException;

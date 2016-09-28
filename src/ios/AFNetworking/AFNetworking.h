@@ -1,4 +1,6 @@
-// Copyright (c) 2012 Mattt Thompson (http://mattt.me/)
+// AFNetworking.h
+//
+// Copyright (c) 2013 AFNetworking (http://afnetworking.com/)
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -17,19 +19,23 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-// Modified by Andrew Stephan
-#import "HttpManager.h"
 
-@implementation HttpManager
+#import <Foundation/Foundation.h>
+#import <Availability.h>
+#import <TargetConditionals.h>
 
-+ (instancetype)sharedClient {
-    static HttpManager *_sharedClient = nil;
-    static dispatch_once_t onceToken;
-    dispatch_once(&onceToken, ^{
-        _sharedClient = [HttpManager manager];
-    });
-    
-    return _sharedClient;
-}
+#ifndef _AFNETWORKING_
+    #define _AFNETWORKING_
 
-@end
+    #import "AFURLRequestSerialization.h"
+    #import "AFURLResponseSerialization.h"
+    #import "AFSecurityPolicy.h"
+
+#if !TARGET_OS_WATCH
+    #import "AFNetworkReachabilityManager.h"
+#endif
+
+    #import "AFURLSessionManager.h"
+    #import "AFHTTPSessionManager.h"
+
+#endif /* _AFNETWORKING_ */

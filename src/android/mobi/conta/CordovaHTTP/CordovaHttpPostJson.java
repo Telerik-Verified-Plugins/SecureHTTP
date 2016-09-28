@@ -1,7 +1,13 @@
 /**
  * A HTTP plugin for Cordova / Phonegap
  */
-package com.synconset;
+package mobi.conta;
+
+import java.io.Console;
+import java.lang.Object;
+import java.io.InputStream;
+import java.io.ByteArrayInputStream;
+import java.nio.charset.StandardCharsets;
 
 import java.net.UnknownHostException;
 import java.util.Map;
@@ -16,20 +22,23 @@ import android.util.Log;
 
 import com.github.kevinsawicki.http.HttpRequest;
 import com.github.kevinsawicki.http.HttpRequest.HttpRequestException;
- 
-public class CordovaHttpDelete extends CordovaHttp implements Runnable {
-    public CordovaHttpDelete(String urlString, Map<?, ?> params, Map<String, String> headers, CallbackContext callbackContext) {
-        super(urlString, params, headers, callbackContext);
+
+public class CordovaHttpPostJson extends CordovaHttp implements Runnable {
+
+    public CordovaHttpPostJson(String urlString, JSONObject jsonObj, Map<String, String> headers, CallbackContext callbackContext) {
+        super(urlString, jsonObj, headers, callbackContext);
     }
-    
+
     @Override
     public void run() {
         try {
-            HttpRequest request = HttpRequest.delete(this.getUrlString());
+            HttpRequest request = HttpRequest.post(this.getUrlString());
             this.setupSecurity(request);
-            request.acceptCharset(CHARSET);
             request.headers(this.getHeaders());
-            request.form(this.getParams());
+            request.accept("application/json");
+            request.contentType(HttpRequest.CONTENT_TYPE_JSON);
+            InputStream payload = new ByteArrayInputStream(getJsonObject().toString().getBytes(StandardCharsets.UTF_8));
+            request.send(payload);
             int code = request.code();
             String body = request.body(CHARSET);
             JSONObject response = new JSONObject();
@@ -49,7 +58,7 @@ public class CordovaHttpDelete extends CordovaHttp implements Runnable {
             } else if (e.getCause() instanceof SSLHandshakeException) {
                 this.respondWithError("SSL handshake failed");
             } else {
-                this.respondWithError("There was an error with the request");
+                this.respondWithError("There was an error with the request" + e.getMessage());
             }
         }
     }

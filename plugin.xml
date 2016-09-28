@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <plugin xmlns="http://www.phonegap.com/ns/plugins/1.0"
   xmlns:android="http://schemas.android.com/apk/res/android"
-  id="com.synconset.cordovaHTTP"
-  version="0.2.2">
+  id="mobi.conta.cordovaHTTP"
+  version="0.0.1">
 
     <name>SSL Pinning</name>
 
@@ -31,23 +31,38 @@
         <header-file src="src/ios/CordovaHttpPlugin.h" />
         <source-file src="src/ios/CordovaHttpPlugin.m" />
 
-        <header-file src="src/ios/HTTPManager.h" />
-        <source-file src="src/ios/HTTPManager.m" />
-
         <header-file src="src/ios/TextResponseSerializer.h" />
         <source-file src="src/ios/TextResponseSerializer.m" />
 
-        <dependency id="cordova-plugin-afnetworking" />
+        <header-file src="src/ios/AFNetworking/AFHTTPSessionManager.h" />
+        <source-file src="src/ios/AFNetworking/AFHTTPSessionManager.m" />
 
-        <framework src="SystemConfiguration.framework" />
+        <header-file src="src/ios/AFNetworking/AFNetworking.h" />
+
+        <header-file src="src/ios/AFNetworking/AFNetworkReachabilityManager.h" />
+        <source-file src="src/ios/AFNetworking/AFNetworkReachabilityManager.m" />
+
+        <header-file src="src/ios/AFNetworking/AFSecurityPolicy.h" />
+        <source-file src="src/ios/AFNetworking/AFSecurityPolicy.m" />
+
+        <header-file src="src/ios/AFNetworking/AFURLRequestSerialization.h" />
+        <source-file src="src/ios/AFNetworking/AFURLRequestSerialization.m" />
+
+        <header-file src="src/ios/AFNetworking/AFURLResponseSerialization.h" />
+        <source-file src="src/ios/AFNetworking/AFURLResponseSerialization.m" />
+
+        <header-file src="src/ios/AFNetworking/AFURLSessionManager.h" />
+        <source-file src="src/ios/AFNetworking/AFURLSessionManager.m" />
+
         <framework src="Security.framework" />
+        <framework src="SystemConfiguration.framework" />
     </platform>
 
     <!--android -->
     <platform name="android">
         <config-file target="res/xml/config.xml" parent="/*">
             <feature name="CordovaHttpPlugin">
-                <param name="android-package" value="com.synconset.CordovaHttpPlugin"/>
+                <param name="android-package" value="mobi.conta.CordovaHttpPlugin"/>
             </feature>
         </config-file>
 
@@ -55,14 +70,17 @@
             <uses-permission android:name="android.permission.INTERNET" />
         </config-file>
 
-        <source-file src="src/android/com/synconset/CordovaHTTP/CordovaHttp.java" target-dir="src/com/synconset" />
-        <source-file src="src/android/com/synconset/CordovaHTTP/CordovaHttpGet.java" target-dir="src/com/synconset" />
-        <source-file src="src/android/com/synconset/CordovaHTTP/CordovaHttpPut.java" target-dir="src/com/synconset" />
-        <source-file src="src/android/com/synconset/CordovaHTTP/CordovaHttpDelete.java" target-dir="src/com/synconset" />
-        <source-file src="src/android/com/synconset/CordovaHTTP/CordovaHttpPost.java" target-dir="src/com/synconset" />
-        <source-file src="src/android/com/synconset/CordovaHTTP/CordovaHttpUpload.java" target-dir="src/com/synconset" />
-        <source-file src="src/android/com/synconset/CordovaHTTP/CordovaHttpDownload.java" target-dir="src/com/synconset" />
-        <source-file src="src/android/com/synconset/CordovaHTTP/CordovaHttpPlugin.java" target-dir="src/com/synconset" />
-        <source-file src="src/android/com/synconset/CordovaHTTP/HttpRequest.java" target-dir="src/com/github/kevinsawicki/http" />
+        <source-file src="src/android/mobi/conta/CordovaHTTP/CordovaHttp.java" target-dir="src/mobi/conta" />
+        <source-file src="src/android/mobi/conta/CordovaHTTP/CordovaHttpGet.java" target-dir="src/mobi/conta" />
+        <source-file src="src/android/mobi/conta/CordovaHTTP/CordovaHttpPut.java" target-dir="src/mobi/conta" />
+        <source-file src="src/android/mobi/conta/CordovaHTTP/CordovaHttpDelete.java" target-dir="src/mobi/conta" />
+        <source-file src="src/android/mobi/conta/CordovaHTTP/CordovaHttpPost.java" target-dir="src/mobi/conta" />
+        <source-file src="src/android/mobi/conta/CordovaHTTP/CordovaHttpPutJson.java" target-dir="src/mobi/conta" />
+        <source-file src="src/android/mobi/conta/CordovaHTTP/CordovaHttpDeleteJson.java" target-dir="src/mobi/conta" />
+        <source-file src="src/android/mobi/conta/CordovaHTTP/CordovaHttpPostJson.java" target-dir="src/mobi/conta" />
+        <source-file src="src/android/mobi/conta/CordovaHTTP/CordovaHttpUpload.java" target-dir="src/mobi/conta" />
+        <source-file src="src/android/mobi/conta/CordovaHTTP/CordovaHttpDownload.java" target-dir="src/mobi/conta" />
+        <source-file src="src/android/mobi/conta/CordovaHTTP/CordovaHttpPlugin.java" target-dir="src/mobi/conta" />
+        <source-file src="src/android/mobi/conta/CordovaHTTP/HttpRequest.java" target-dir="src/com/github/kevinsawicki/http" />
     </platform>
 </plugin>
