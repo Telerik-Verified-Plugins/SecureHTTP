@@ -41,11 +41,13 @@ public class CordovaHttpPlugin extends CordovaPlugin {
     private static final String TAG = "CordovaHTTP";
 
     private HashMap<String, String> globalHeaders;
+    private HashMap<String, String> globalCookies;
 
     @Override
     public void initialize(CordovaInterface cordova, CordovaWebView webView) {
         super.initialize(cordova, webView);
         this.globalHeaders = new HashMap<String, String>();
+        this.globalCookies = new HashMap<String, String>();
     }
 
     @Override
@@ -124,6 +126,15 @@ public class CordovaHttpPlugin extends CordovaPlugin {
             String filePath = args.getString(3);
             CordovaHttpDownload download = new CordovaHttpDownload(urlString, paramsMap, headersMap, callbackContext, filePath);
             cordova.getThreadPool().execute(download);
+        } else if (action.equals("loginSiteMinder") ){
+        	String urlString = args.getString(0);
+        	JSONObject params = args.getJSONObject(1);
+        	HashMap<?, ?> paramsMap = this.getMapFromJSONObject(params);
+        	String username = (String) paramsMap.get("username");
+        	String password = (String) paramsMap.get("password");
+        	useBasicAuth(username, password);      
+        	CordovaHttpLoginSM loginSm = new CordovaHttpLoginSM(urlString,paramsMap,this.globalHeaders,callbackContext);
+        	cordova.getThreadPool().execute(loginSm);
         } else {
             return false;
         }

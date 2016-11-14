@@ -10,6 +10,12 @@ var http = {
     useBasicAuth: function(username, password, success, failure) {
         return exec(success, failure, "CordovaHttpPlugin", "useBasicAuth", [username, password]);
     },
+	loginSiteMinder: function(username, password, targetUrl, url, success, failure){
+			var params = {username: username, password: password, targetUrl: targetUrl};	
+			//var params = JSON.stringify(obj);
+
+		return exec(success, failure, "CordovaHttpPlugin", "loginSiteMinder", [url, params]);
+	},
     setHeader: function(header, value, success, failure) {
         return exec(success, failure, "CordovaHttpPlugin", "setHeader", [header, value]);
     },
@@ -108,6 +114,9 @@ if (typeof angular !== "undefined") {
             useBasicAuth: function(username, password) {
                 return makePromise(http.useBasicAuth, [username, password]);
             },
+			loginSiteMinder: function(username, password, url, targetUrl){
+				return makePromise(http.loginSiteMinder, [username,password,targetUrl,url],true);
+			},
             setHeader: function(header, value) {
                 return makePromise(http.setHeader, [header, value]);
             },
