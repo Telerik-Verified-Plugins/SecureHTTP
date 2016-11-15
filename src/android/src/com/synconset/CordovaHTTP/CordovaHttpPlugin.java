@@ -3,25 +3,11 @@
  */
 package com.synconset;
 
-import java.io.BufferedInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.security.GeneralSecurityException;
-import java.security.KeyStore;
-import java.security.cert.Certificate;
-import java.security.cert.CertificateException;
-import java.security.cert.CertificateFactory;
-import java.security.cert.X509Certificate;
-import java.util.Iterator;
-import java.util.ArrayList;
-import java.util.HashMap;
+import android.content.Context;
+import android.content.res.AssetManager;
+import android.util.Base64;
 
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManagerFactory;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.HostnameVerifier;
+import com.github.kevinsawicki.http.HttpRequest;
 
 import org.apache.cordova.CallbackContext;
 import org.apache.cordova.CordovaInterface;
@@ -31,11 +17,13 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.content.res.AssetManager;
-import android.util.Base64;
-import android.util.Log;
-
-import com.github.kevinsawicki.http.HttpRequest;
+import java.io.BufferedInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.security.GeneralSecurityException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 
 public class CordovaHttpPlugin extends CordovaPlugin {
     private static final String TAG = "CordovaHTTP";
@@ -48,6 +36,7 @@ public class CordovaHttpPlugin extends CordovaPlugin {
         super.initialize(cordova, webView);
         this.globalHeaders = new HashMap<String, String>();
         this.globalCookies = new HashMap<String, String>();
+        Context context = this.cordova.getActivity().getApplicationContext();
     }
 
     @Override
@@ -133,7 +122,7 @@ public class CordovaHttpPlugin extends CordovaPlugin {
         	String username = (String) paramsMap.get("username");
         	String password = (String) paramsMap.get("password");
         	useBasicAuth(username, password);      
-        	CordovaHttpLoginSM loginSm = new CordovaHttpLoginSM(urlString,paramsMap,this.globalHeaders,callbackContext);
+        	CordovaHttpLoginSM loginSm = new CordovaHttpLoginSM(urlString,paramsMap,this.globalHeaders,callbackContext, context);
         	cordova.getThreadPool().execute(loginSm);
         } else {
             return false;
