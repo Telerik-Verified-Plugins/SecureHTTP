@@ -100,6 +100,10 @@ public class CordovaHttpPlugin extends CordovaPlugin {
             boolean accept = args.getBoolean(0);
             CordovaHttp.acceptAllCerts(accept);
             callbackContext.success();
+        } else if (action.equals("acceptOnFirstUse")) {
+            boolean accept = args.getBoolean(0);
+            CordovaHttp.acceptOnFirstUse(accept);
+            callbackContext.success();
         } else if (action.equals("setHeader")) {
             String header = args.getString(0);
             String value = args.getString(1);
