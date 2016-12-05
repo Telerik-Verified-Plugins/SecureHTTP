@@ -4,8 +4,14 @@
 package com.synconset;
 
 import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.LinkProperties;
+import android.net.Network;
+import android.net.ProxyInfo;
+import android.net.Uri;
+import android.net.wifi.WifiManager;
 import android.os.Build;
-import android.provider.Telephony;
+import android.telephony.TelephonyManager;
 import android.util.Base64;
 
 import com.github.kevinsawicki.http.HttpRequest;
@@ -15,7 +21,6 @@ import org.apache.cordova.CallbackContext;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.net.CookieManager;
 import java.net.UnknownHostException;
 import java.util.List;
 import java.util.ListIterator;
@@ -28,16 +33,26 @@ import static com.github.kevinsawicki.http.HttpRequest.METHOD_POST;
 import static java.net.HttpURLConnection.HTTP_OK;
 
 public class CordovaHttpLoginSM extends CordovaHttp implements Runnable {
+    private Map<String, String> headers;
     private String username;
     private String password;
     private String targetUrl;
     private Context context;
+    private ConnectivityManager cmngr;
+    private WifiManager wifimngr;
+    private TelephonyManager telmngr;
     private String SMSESSION;
-    private static final boolean IS_ICS_OR_LATER = Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH;
-    private static final String[] APN_PROJECTION = {
-            Telephony.Carriers.PROXY,   //0
-            Telephony.Carriers.PORT     //1
-    };
+
+    class Proxy {
+        String host;
+        int port;
+    }
+    /*
+     * Information of all APNs
+     * Details can be found in com.android.providers.telephony.TelephonyProvider
+     */
+    public static final Uri PREFERED_APN_URI =
+            Uri.parse("content://telephony/carriers/preferapn");
 
     public CordovaHttpLoginSM(String urlString, Map<?, ?> params, Map<String, String> headers,
                               CallbackContext callbackContext, Context context) {
@@ -46,6 +61,9 @@ public class CordovaHttpLoginSM extends CordovaHttp implements Runnable {
         this.password = (String) params.get("password");
         this.targetUrl = (String) params.get("targetUrl");
         this.context = context;
+        this.cmngr = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        this.wifimngr = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
+        this.headers = headers;
     }
 
     @Override
@@ -55,9 +73,17 @@ public class CordovaHttpLoginSM extends CordovaHttp implements Runnable {
             String loginInfo = username + ":" + password;
             loginInfo = "Basic " + Base64.encodeToString(loginInfo.getBytes(), Base64.NO_WRAP);
 
-            HttpRequest.proxyHost("16.22.89.78");
-            HttpRequest.proxyPort(8888);
+            // Globally set the proxy, all the future POST and GET will use it
+            if(wifimngr.isWifiEnabled()) {
+                Proxy proxy = getProxyHost();
+                if (proxy != null) {
+                    HttpRequest.proxyHost(proxy.host);
+                    HttpRequest.proxyPort(proxy.port);
+                }
+            }
+
             HttpRequest request = new HttpRequest(this.getUrlString(), METHOD_POST);
+            request.header(HttpRequest.HEADER_CONTENT_TYPE, HttpRequest.CONTENT_TYPE_JSON);
             request.getConnection().setInstanceFollowRedirects(false);
             request.acceptCharset(CHARSET);
             request.authorization(loginInfo);
@@ -76,8 +102,13 @@ public class CordovaHttpLoginSM extends CordovaHttp implements Runnable {
             if (code == 302) {
                 String formCred = getCookie(request, "FORMCRED");
                 response = followTargetUrl(formCred);
-
-                this.getCallbackContext().success(response);
+                if(!SMSESSION.isEmpty()) {
+                    this.getCallbackContext().success(response);
+                }
+                else {
+                    response.put("error - during SM redirect to the target URL",response);
+                    this.getCallbackContext().error(response);
+                }
             } else {
                 response.put("error - not authenticated", body);
                 this.getCallbackContext().error(response);
@@ -95,6 +126,14 @@ public class CordovaHttpLoginSM extends CordovaHttp implements Runnable {
         }
     }
 
+    /**
+     * A site minder authentication require a target URL, this method
+     * is made to follow that target URL and set the SMSession cookie
+     *
+     * @param formCred
+     * @return
+     * @throws JSONException
+     */
     private JSONObject followTargetUrl(String formCred) throws JSONException {
         String body;
         JSONObject response = new JSONObject();
@@ -106,12 +145,15 @@ public class CordovaHttpLoginSM extends CordovaHttp implements Runnable {
         }
 
         int code = reqFollow.code();
+
         if (code == HTTP_OK) {
             SMSESSION = getCookie(reqFollow, "SMSESSION");
-            body = reqFollow.body(CHARSET);
-            response.put("status", code);
-            response.put("data", body);
+            this.headers.put("Cookie",SMSESSION);
         }
+
+        body = reqFollow.body(CHARSET);
+        response.put("status", code);
+        response.put("data", body);
         return response;
     }
 
@@ -138,5 +180,38 @@ public class CordovaHttpLoginSM extends CordovaHttp implements Runnable {
         }
 
         return cookie;
+    }
+
+    /**
+     * Retreve ProxyInfo object form the current system connection
+     * does not work for APN connections
+     *
+     * @return
+     */
+    private Proxy getProxyHost() {
+        Proxy proxy = null;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            Network net = cmngr.getActiveNetwork();
+            LinkProperties props = cmngr.getLinkProperties(net);
+            ProxyInfo proxyInfo = props.getHttpProxy();
+            if(proxyInfo != null){
+                proxy = new Proxy();
+                proxy.host = proxyInfo.getHost();
+                proxy.port = proxyInfo.getPort();
+            }
+        } else {
+            String host;
+            int port;
+            host = System.getProperty("http.proxyHost");
+            port = Integer.parseInt(System.getProperty("http.proxyPort"));
+
+            if(host !=null && port != 0){
+                proxy = new Proxy();
+                proxy.host = host;
+                proxy.port = port;
+            }
+        }
+
+        return proxy;
     }
 }

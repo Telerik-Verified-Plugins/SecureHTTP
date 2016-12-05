@@ -3,7 +3,11 @@
  */
 package com.synconset;
 
+import java.io.IOException;
+import java.io.ObjectOutputStream;
+import java.io.OutputStreamWriter;
 import java.net.UnknownHostException;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.cordova.CallbackContext;
@@ -16,12 +20,12 @@ import android.util.Log;
 
 import com.github.kevinsawicki.http.HttpRequest;
 import com.github.kevinsawicki.http.HttpRequest.HttpRequestException;
- 
+
 public class CordovaHttpPost extends CordovaHttp implements Runnable {
-    public CordovaHttpPost(String urlString, Map<?, ?> params, Map<String, String> headers, CallbackContext callbackContext) {
+    public CordovaHttpPost(String urlString, Object params, Map<String, String> headers, CallbackContext callbackContext) {
         super(urlString, params, headers, callbackContext);
     }
-    
+
     @Override
     public void run() {
         try {
@@ -29,7 +33,20 @@ public class CordovaHttpPost extends CordovaHttp implements Runnable {
             this.setupSecurity(request);
             request.acceptCharset(CHARSET);
             request.headers(this.getHeaders());
-            request.form(this.getParams());
+
+            String contentType = this.getContentType();
+            if (contentType.compareTo(HttpRequest.CONTENT_TYPE_JSON) == 0) {
+                request.acceptJson();
+                request.send(this.getParams().toString());
+            } else if (contentType.compareTo(HttpRequest.CONTENT_TYPE_FORM) == 0) {
+                HashMap<String,Object> data = getMapFromJSONObject(this.getParams());
+                request.form(data);
+            } else {
+                //Default use case application/json
+                request.acceptJson();
+                request.send(this.getParams().toString());
+            }
+
             int code = request.code();
             String body = request.body(CHARSET);
             JSONObject response = new JSONObject();
@@ -43,7 +60,7 @@ public class CordovaHttpPost extends CordovaHttp implements Runnable {
             }
         } catch (JSONException e) {
             this.respondWithError("There was an error generating the response");
-        }  catch (HttpRequestException e) {
+        } catch (HttpRequestException e) {
             if (e.getCause() instanceof UnknownHostException) {
                 this.respondWithError(0, "The host could not be resolved");
             } else if (e.getCause() instanceof SSLHandshakeException) {
@@ -53,4 +70,5 @@ public class CordovaHttpPost extends CordovaHttp implements Runnable {
             }
         }
     }
+
 }

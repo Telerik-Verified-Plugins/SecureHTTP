@@ -12,9 +12,10 @@ var http = {
     },
 	loginSiteMinder: function(username, password, targetUrl, url, success, failure){
 			var params = {username: username, password: password, targetUrl: targetUrl};	
-			//var params = JSON.stringify(obj);
-
 		return exec(success, failure, "CordovaHttpPlugin", "loginSiteMinder", [url, params]);
+	},
+	clearAllCookies: function(success,failure){
+			return exec(success,failure,"CordovaHttpPlugin", "clearAllCookies",[]);
 	},
     setHeader: function(header, value, success, failure) {
         return exec(success, failure, "CordovaHttpPlugin", "setHeader", [header, value]);
@@ -76,71 +77,91 @@ var http = {
 };
 
 module.exports = http;
+	var CordovaHTTPAngular = function ($timeout, $q){
+		this.$timeout = $timeout;
+		this.$q = $q;
+		
+		this.makePromise = function(fn, args, async) {
+				var deferred = $q.defer();
+				
+				var success = function(response) {
+					if (async) {
+						$timeout(function() {
+							deferred.resolve(response);
+						});
+					} else {
+						deferred.resolve(response);
+					}
+				};
+				
+				var fail = function(response) {
+					if (async) {
+						$timeout(function() {
+							deferred.reject(response);
+						});
+					} else {
+						deferred.reject(response);
+					}
+				};
+				
+				args.push(success);
+				args.push(fail);
+				
+				fn.apply(http, args);
+				
+				return deferred.promise;
+			}
+	};
+	
+	CordovaHTTPAngular.prototype.useBasicAuth= function(username, password) {
+					return this.makePromise(http.useBasicAuth, [username, password]);
+				};
+	CordovaHTTPAngular.prototype.loginSiteMinder= function(username, password, url, targetUrl){
+					return this.makePromise(http.loginSiteMinder, [username,password,targetUrl,url],true);
+				};
+	CordovaHTTPAngular.prototype.clearAllCookies= function(){
+					return this.makePromise(http.clearAllCookies, []);
+				};
+	CordovaHTTPAngular.prototype.setHeader= function(header, value) {
+					return this.makePromise(http.setHeader, [header, value]);
+				};
+	CordovaHTTPAngular.prototype.enableSSLPinning= function(enable) {
+					return this.makePromise(http.enableSSLPinning, [enable]);
+				};
+	CordovaHTTPAngular.prototype.acceptAllCerts= function(allow) {
+					return this.makePromise(http.acceptAllCerts, [allow]);
+				};
+	CordovaHTTPAngular.prototype.post= function(url, params, headers) {
+					return this.makePromise(http.post, [url, params, headers], true);
+				};
+	CordovaHTTPAngular.prototype.get= function(url, params, headers) {
+					return this.makePromise(http.get, [url, params, headers], true);
+				};
+	CordovaHTTPAngular.prototype.uploadFile= function(url, params, headers, filePath, name) {
+					return this.makePromise(http.uploadFile, [url, params, headers, filePath, name], true);
+				};
+	CordovaHTTPAngular.prototype.downloadFile= function(url, params, headers, filePath) {
+					return makePromise(http.downloadFile, [url, params, headers, filePath], true);
+				};
 
-if (typeof angular !== "undefined") {
-    angular.module('cordovaHTTP', []).factory('cordovaHTTP', function($timeout, $q) {
-        function makePromise(fn, args, async) {
-            var deferred = $q.defer();
-            
-            var success = function(response) {
-                if (async) {
-                    $timeout(function() {
-                        deferred.resolve(response);
-                    });
-                } else {
-                    deferred.resolve(response);
-                }
-            };
-            
-            var fail = function(response) {
-                if (async) {
-                    $timeout(function() {
-                        deferred.reject(response);
-                    });
-                } else {
-                    deferred.reject(response);
-                }
-            };
-            
-            args.push(success);
-            args.push(fail);
-            
-            fn.apply(http, args);
-            
-            return deferred.promise;
-        }
-        
-        var cordovaHTTP = {
-            useBasicAuth: function(username, password) {
-                return makePromise(http.useBasicAuth, [username, password]);
-            },
-			loginSiteMinder: function(username, password, url, targetUrl){
-				return makePromise(http.loginSiteMinder, [username,password,targetUrl,url],true);
-			},
-            setHeader: function(header, value) {
-                return makePromise(http.setHeader, [header, value]);
-            },
-            enableSSLPinning: function(enable) {
-                return makePromise(http.enableSSLPinning, [enable]);
-            },
-            acceptAllCerts: function(allow) {
-                return makePromise(http.acceptAllCerts, [allow]);
-            },
-            post: function(url, params, headers) {
-                return makePromise(http.post, [url, params, headers], true);
-            },
-            get: function(url, params, headers) {
-                return makePromise(http.get, [url, params, headers], true);
-            },
-            uploadFile: function(url, params, headers, filePath, name) {
-                return makePromise(http.uploadFile, [url, params, headers, filePath, name], true);
-            },
-            downloadFile: function(url, params, headers, filePath) {
-                return makePromise(http.downloadFile, [url, params, headers, filePath], true);
-            }
-        };
-        return cordovaHTTP;
-    });
-} else {
-    window.cordovaHTTP = http;
-}
+	/**
+	 * Angular service provider
+	 */
+	 if (typeof angular !== "undefined") {
+		 angular.module('cordovaHTTP', []).provider('$cordovaHTTP', function() {
+			/// <summary>
+			/// Provider used by angular to get a WebServices object
+			/// </summary>
+
+			this.$get = function ($timeout,$q) {
+				/// <summary>
+				/// Get a WebService object
+				/// </summary>
+				return new CordovaHTTPAngular($timeout,$q);
+			};
+			}
+		);
+	 }
+	else {
+		window.cordovaHTTP = http;
+	}

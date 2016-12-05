@@ -53,6 +53,7 @@
 
         <config-file target="AndroidManifest.xml" parent="/manifest">
             <uses-permission android:name="android.permission.INTERNET" />
+			<uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
         </config-file>
 
         <source-file src="src/android/src/com/synconset/CordovaHTTP/CordovaHttp.java" target-dir="src/com/synconset" />

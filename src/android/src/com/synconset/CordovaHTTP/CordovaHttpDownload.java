@@ -25,7 +25,7 @@ import org.json.JSONObject;
 public class CordovaHttpDownload extends CordovaHttp implements Runnable {
     private String filePath;
     
-    public CordovaHttpDownload(String urlString, Map<?, ?> params, Map<String, String> headers, CallbackContext callbackContext, String filePath) {
+    public CordovaHttpDownload(String urlString, Object params, Map<String, String> headers, CallbackContext callbackContext, String filePath) {
         super(urlString, params, headers, callbackContext);
         this.filePath = filePath;
     }
@@ -33,7 +33,8 @@ public class CordovaHttpDownload extends CordovaHttp implements Runnable {
     @Override
     public void run() {
         try {
-            HttpRequest request = HttpRequest.get(this.getUrlString(), this.getParams(), true);
+            Map<?, ?> data = this.getMapFromJSONObject(this.getParams());
+            HttpRequest request = HttpRequest.get(this.getUrlString(), data, true);
             this.setupSecurity(request);
             request.acceptCharset(CHARSET);
             request.headers(this.getHeaders());
