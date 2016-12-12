@@ -101,17 +101,23 @@ public class CordovaHttpLoginSM extends CordovaHttp implements Runnable {
 
             if (code == 302) {
                 String formCred = getCookie(request, "FORMCRED");
+
+                if(formCred == null){
+                    //Site Minder authentication failed as FORMCRED cookie was not returned
+                    this.respondWithError(401,"Authentication failed");
+                }
+
                 response = followTargetUrl(formCred);
+
+                // The SMSESSION variable is set by followTargetUrl
                 if(!SMSESSION.isEmpty()) {
                     this.getCallbackContext().success(response);
                 }
                 else {
-                    response.put("error - during SM redirect to the target URL",response);
-                    this.getCallbackContext().error(response);
+                    this.respondWithError(500,"SM redirect failed");
                 }
             } else {
-                response.put("error - not authenticated", body);
-                this.getCallbackContext().error(response);
+                this.respondWithError(401,"Authentication failed");
             }
         } catch (JSONException e) {
             this.respondWithError("There was an error generating the response");
