@@ -3,6 +3,7 @@
  */
 package com.synconset;
 
+import android.accounts.AuthenticatorException;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.LinkProperties;
@@ -30,6 +31,7 @@ import javax.net.ssl.SSLHandshakeException;
 
 import static com.github.kevinsawicki.http.HttpRequest.METHOD_GET;
 import static com.github.kevinsawicki.http.HttpRequest.METHOD_POST;
+import static java.net.HttpURLConnection.HTTP_MOVED_TEMP;
 import static java.net.HttpURLConnection.HTTP_OK;
 
 public class CordovaHttpLoginSM extends CordovaHttp implements Runnable {
@@ -47,6 +49,7 @@ public class CordovaHttpLoginSM extends CordovaHttp implements Runnable {
         String host;
         int port;
     }
+
     /*
      * Information of all APNs
      * Details can be found in com.android.providers.telephony.TelephonyProvider
@@ -74,7 +77,7 @@ public class CordovaHttpLoginSM extends CordovaHttp implements Runnable {
             loginInfo = "Basic " + Base64.encodeToString(loginInfo.getBytes(), Base64.NO_WRAP);
 
             // Globally set the proxy, all the future POST and GET will use it
-            if(wifimngr.isWifiEnabled()) {
+            if (wifimngr.isWifiEnabled()) {
                 Proxy proxy = getProxyHost();
                 if (proxy != null) {
                     HttpRequest.proxyHost(proxy.host);
@@ -102,22 +105,21 @@ public class CordovaHttpLoginSM extends CordovaHttp implements Runnable {
             if (code == 302) {
                 String formCred = getCookie(request, "FORMCRED");
 
-                if(formCred == null){
+                if (formCred == null) {
                     //Site Minder authentication failed as FORMCRED cookie was not returned
-                    this.respondWithError(401,"Authentication failed");
+                    this.respondWithError(401, "Authentication failed - FORMCRED COOKIE not found");
                 }
 
                 response = followTargetUrl(formCred);
 
                 // The SMSESSION variable is set by followTargetUrl
-                if(!SMSESSION.isEmpty()) {
+                if (!SMSESSION.isEmpty()) {
                     this.getCallbackContext().success(response);
-                }
-                else {
-                    this.respondWithError(500,"SM redirect failed");
+                } else {
+                    this.respondWithError(500, "SM redirect failed");
                 }
             } else {
-                this.respondWithError(401,"Authentication failed");
+                this.respondWithError(401, "Authentication failed");
             }
         } catch (JSONException e) {
             this.respondWithError("There was an error generating the response");
@@ -140,10 +142,11 @@ public class CordovaHttpLoginSM extends CordovaHttp implements Runnable {
      * @return
      * @throws JSONException
      */
-    private JSONObject followTargetUrl(String formCred) throws JSONException {
-        String body;
+    private JSONObject followTargetUrl(String formCred) throws Exception, AuthenticatorException {
         JSONObject response = new JSONObject();
+        String body;
         HttpRequest reqFollow = new HttpRequest(this.targetUrl, METHOD_GET);
+        reqFollow.getConnection().setInstanceFollowRedirects(false);
         setupSecurity(reqFollow);
 
         if (formCred != null) {
@@ -154,13 +157,17 @@ public class CordovaHttpLoginSM extends CordovaHttp implements Runnable {
 
         if (code == HTTP_OK) {
             SMSESSION = getCookie(reqFollow, "SMSESSION");
-            this.headers.put("Cookie",SMSESSION);
+            this.headers.put("Cookie", SMSESSION);
+            body = reqFollow.body(CHARSET);
+            response.put("status", code);
+            response.put("data", body);
+            return response;
+        } else if (code == HTTP_MOVED_TEMP) {
+            throw new AuthenticatorException("Bad credentials");
         }
-
-        body = reqFollow.body(CHARSET);
-        response.put("status", code);
-        response.put("data", body);
-        return response;
+        else {
+            throw new Exception("Authentication failed");
+        }
     }
 
     /**
@@ -200,7 +207,7 @@ public class CordovaHttpLoginSM extends CordovaHttp implements Runnable {
             Network net = cmngr.getActiveNetwork();
             LinkProperties props = cmngr.getLinkProperties(net);
             ProxyInfo proxyInfo = props.getHttpProxy();
-            if(proxyInfo != null){
+            if (proxyInfo != null) {
                 proxy = new Proxy();
                 proxy.host = proxyInfo.getHost();
                 proxy.port = proxyInfo.getPort();
@@ -211,7 +218,7 @@ public class CordovaHttpLoginSM extends CordovaHttp implements Runnable {
             host = System.getProperty("http.proxyHost");
             port = Integer.parseInt(System.getProperty("http.proxyPort"));
 
-            if(host !=null && port != 0){
+            if (host != null && port != 0) {
                 proxy = new Proxy();
                 proxy.host = host;
                 proxy.port = port;
