@@ -131,6 +131,10 @@ public class CordovaHttpLoginSM extends CordovaHttp implements Runnable {
             } else {
                 this.respondWithError("There was an error with the request");
             }
+        } catch(AuthenticatorException e){
+            this.respondWithError(e.getMessage());
+        } catch(Exception e){
+            this.respondWithError(e.getMessage());
         }
     }
 
