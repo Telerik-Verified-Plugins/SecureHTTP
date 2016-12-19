@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.BufferedReader;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -28,7 +29,9 @@ import java.util.Iterator;
 import android.util.Log;
 
 import com.github.kevinsawicki.http.HttpRequest;
- 
+
+import static com.github.kevinsawicki.http.HttpRequest.HEADER_CONTENT_TYPE;
+
 public abstract class CordovaHttp {
     protected static final String TAG = "CordovaHTTP";
     protected static final String CHARSET = "UTF-8";
@@ -37,11 +40,11 @@ public abstract class CordovaHttp {
     private static AtomicBoolean acceptAllCerts = new AtomicBoolean(false);
     
     private String urlString;
-    private Map<?, ?> params;
+    private Object params;
     private Map<String, String> headers;
     private CallbackContext callbackContext;
     
-    public CordovaHttp(String urlString, Map<?, ?> params, Map<String, String> headers, CallbackContext callbackContext) {
+    public CordovaHttp(String urlString, Object params, Map<String, String> headers, CallbackContext callbackContext) {
         this.urlString = urlString;
         this.params = params;
         this.headers = headers;
@@ -66,7 +69,7 @@ public abstract class CordovaHttp {
         return this.urlString;
     }
     
-    protected Map<?, ?> getParams() {
+    protected Object getParams() {
         return this.params;
     }
     
@@ -102,5 +105,36 @@ public abstract class CordovaHttp {
     
     protected void respondWithError(String msg) {
         this.respondWithError(500, msg);
+    }
+
+    protected HashMap<String, Object> getMapFromJSONObject(JSONObject object) throws JSONException {
+        HashMap<String, Object> map = new HashMap<String, Object>();
+        Iterator<?> i = object.keys();
+
+        while(i.hasNext()) {
+            String key = (String)i.next();
+            map.put(key, object.get(key));
+        }
+        return map;
+    }
+
+    protected HashMap<String, Object> getMapFromJSONObject(Object object) throws JSONException {
+        if(object instanceof JSONObject){
+            return getMapFromJSONObject((JSONObject) object);
+        }
+        else {
+            throw new JSONException("The object is not a JSONObject");
+        }
+
+    }
+
+    protected String getContentType(){
+        Map<String,String> headers = getHeaders();
+        if(headers.containsKey(HEADER_CONTENT_TYPE)){
+            return headers.get(HEADER_CONTENT_TYPE);
+        }
+        else{
+            return null;
+        }
     }
 }

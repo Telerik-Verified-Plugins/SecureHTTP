@@ -17,19 +17,20 @@ import android.util.Log;
 import com.github.kevinsawicki.http.HttpRequest;
 import com.github.kevinsawicki.http.HttpRequest.HttpRequestException;
  
-public class CordovaHttpPut extends CordovaHttp implements Runnable {
-    public CordovaHttpPut(String urlString, Map<?, ?> params, Map<String, String> headers, CallbackContext callbackContext) {
+public class CordovaHttpDelete extends CordovaHttp implements Runnable {
+    public CordovaHttpDelete(String urlString, Object params, Map<String, String> headers, CallbackContext callbackContext) {
         super(urlString, params, headers, callbackContext);
     }
     
     @Override
     public void run() {
         try {
-            HttpRequest request = HttpRequest.put(this.getUrlString());
+            Map<?,?> data = getMapFromJSONObject(this.getParams());
+            HttpRequest request = HttpRequest.delete(this.getUrlString());
             this.setupSecurity(request);
             request.acceptCharset(CHARSET);
             request.headers(this.getHeaders());
-            request.form(this.getParams());
+            request.form(data);
             int code = request.code();
             String body = request.body(CHARSET);
             JSONObject response = new JSONObject();

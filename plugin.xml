@@ -17,7 +17,7 @@
     <dependency id="cordova-plugin-file" version=">=2.0.0" />
 
     <js-module src="www/cordovaHTTP.js" name="CordovaHttpPlugin">
-        <clobbers target="plugins.CordovaHttpPlugin" />
+        <clobbers target="window.cordovaHTTP" />
     </js-module>
 
     <!-- ios -->
@@ -53,16 +53,18 @@
 
         <config-file target="AndroidManifest.xml" parent="/manifest">
             <uses-permission android:name="android.permission.INTERNET" />
+			<uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
         </config-file>
 
-        <source-file src="src/android/com/synconset/CordovaHTTP/CordovaHttp.java" target-dir="src/com/synconset" />
-        <source-file src="src/android/com/synconset/CordovaHTTP/CordovaHttpGet.java" target-dir="src/com/synconset" />
-        <source-file src="src/android/com/synconset/CordovaHTTP/CordovaHttpPut.java" target-dir="src/com/synconset" />
-        <source-file src="src/android/com/synconset/CordovaHTTP/CordovaHttpDelete.java" target-dir="src/com/synconset" />
-        <source-file src="src/android/com/synconset/CordovaHTTP/CordovaHttpPost.java" target-dir="src/com/synconset" />
-        <source-file src="src/android/com/synconset/CordovaHTTP/CordovaHttpUpload.java" target-dir="src/com/synconset" />
-        <source-file src="src/android/com/synconset/CordovaHTTP/CordovaHttpDownload.java" target-dir="src/com/synconset" />
-        <source-file src="src/android/com/synconset/CordovaHTTP/CordovaHttpPlugin.java" target-dir="src/com/synconset" />
-        <source-file src="src/android/com/synconset/CordovaHTTP/HttpRequest.java" target-dir="src/com/github/kevinsawicki/http" />
+        <source-file src="src/android/src/com/synconset/CordovaHTTP/CordovaHttp.java" target-dir="src/com/synconset" />
+        <source-file src="src/android/src/com/synconset/CordovaHTTP/CordovaHttpGet.java" target-dir="src/com/synconset" />
+        <source-file src="src/android/src/com/synconset/CordovaHTTP/CordovaHttpPut.java" target-dir="src/com/synconset" />
+        <source-file src="src/android/src/com/synconset/CordovaHTTP/CordovaHttpDelete.java" target-dir="src/com/synconset" />
+        <source-file src="src/android/src/com/synconset/CordovaHTTP/CordovaHttpPost.java" target-dir="src/com/synconset" />
+        <source-file src="src/android/src/com/synconset/CordovaHTTP/CordovaHttpUpload.java" target-dir="src/com/synconset" />
+        <source-file src="src/android/src/com/synconset/CordovaHTTP/CordovaHttpDownload.java" target-dir="src/com/synconset" />
+        <source-file src="src/android/src/com/synconset/CordovaHTTP/CordovaHttpPlugin.java" target-dir="src/com/synconset" />
+		<source-file src="src/android/src/com/synconset/CordovaHTTP/CordovaHttpLoginSM.java" target-dir="src/com/synconset" />
+        <source-file src="src/android/src/com/synconset/CordovaHTTP/HttpRequest.java" target-dir="src/com/github/kevinsawicki/http" />
     </platform>
 </plugin>

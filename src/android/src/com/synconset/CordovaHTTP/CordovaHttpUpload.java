@@ -28,7 +28,7 @@ public class CordovaHttpUpload extends CordovaHttp implements Runnable {
     private String filePath;
     private String name;
     
-    public CordovaHttpUpload(String urlString, Map<?, ?> params, Map<String, String> headers, CallbackContext callbackContext, String filePath, String name) {
+    public CordovaHttpUpload(String urlString, Object params, Map<String, String> headers, CallbackContext callbackContext, String filePath, String name) {
         super(urlString, params, headers, callbackContext);
         this.filePath = filePath;
         this.name = name;
@@ -37,6 +37,7 @@ public class CordovaHttpUpload extends CordovaHttp implements Runnable {
     @Override
     public void run() {
         try {
+            Map<?,?> data = getMapFromJSONObject((this.getParams()));
             HttpRequest request = HttpRequest.post(this.getUrlString());
             this.setupSecurity(request);
             request.acceptCharset(CHARSET);
@@ -50,7 +51,7 @@ public class CordovaHttpUpload extends CordovaHttp implements Runnable {
             String mimeType = mimeTypeMap.getMimeTypeFromExtension(ext);
             request.part(this.name, filename, mimeType, new File(uri));
             
-            Set<?> set = (Set<?>)this.getParams().entrySet();
+            Set<?> set = (Set<?>)data.entrySet();
             Iterator<?> i = set.iterator();
             while (i.hasNext()) {
                 Entry<?, ?> e = (Entry<?, ?>)i.next();

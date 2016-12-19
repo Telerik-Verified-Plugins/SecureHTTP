@@ -157,7 +157,39 @@ Downloads a file and saves it to the device.  Takes a URL, parameters, headers, 
         console.error(response.error);
     });
 
+### loginSiteMinder
+Authenticate a user to siteMinder. In the following sample the plugin was injected by angular as a module dependancy.
 
+	var promise = this.$cordovaHTTP.loginSiteMinder(username, password,authUrl,targetUrl);
+	promise.then(
+				//Success
+				function (response){
+					var data = JSON.parse(response.data);
+					if(typeof success === "function"){
+						success(data);				
+					}
+				},
+				//Fail
+				function (msg){
+					if( typeof failure === "function"){
+						failure(msg);
+					}
+				}						
+	);
+
+### clearAllCookies
+This function will remove all the cookies associated with the HTTP connection. It is use to log out.  In the following sample the plugin was injected by angular as a module dependancy.
+
+	var promise = this.$cordovaHTTP.clearAllCookies();
+		promise.then(
+			//Success
+			function(){
+				_this.$log.debug("LOGOUT SUCCEED");			
+					if(typeof success === "function"){
+						success();				
+					}
+			}
+		);			
 ## Libraries
 
 This plugin utilizes some awesome open source networking libraries.  These are both MIT licensed:
@@ -178,14 +210,4 @@ For instance, the following features are currently not supported:
 
 Take this into account when using this plugin into your application.
 
-## License
 
-The MIT License
-
-Copyright (c) 2014 Wymsee, Inc
-
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
